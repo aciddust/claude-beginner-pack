@@ -21,7 +21,7 @@ TSLA 리포트
 ## 파일 구조
 
 ```
-claude-test/
+stock/
 ├─ README.md                            # 이 파일
 ├─ CLAUDE.md                            # 프로젝트 진입 시 Claude가 자동 로드
 ├─ RULE.md                              # 리포트 형식 규칙
