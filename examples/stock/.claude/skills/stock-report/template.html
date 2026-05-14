@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>{{COMPANY_KR}} ({{TICKER}}) 주가 분석 리포트 — {{REPORT_DATE}}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm 16mm; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Malgun Gothic','Segoe UI','Apple SD Gothic Neo',sans-serif; color:#1f2328; font-size:10.5pt; line-height:1.55; margin:0; }
+  h1 { font-size:20pt; margin:0 0 4pt; letter-spacing:-0.3pt; }
+  h2 { font-size:13pt; margin:18pt 0 8pt; padding-bottom:4pt; border-bottom:2px solid #1f2328; }
+  .meta { color:#666; font-size:9.5pt; margin-bottom:10pt; }
+  .meta span { margin-right:14pt; }
+  table { width:100%; border-collapse:collapse; margin:6pt 0 4pt; font-size:10pt; }
+  th, td { border:1px solid #d0d7de; padding:6pt 8pt; text-align:left; vertical-align:top; }
+  th { background:#f6f8fa; font-weight:600; }
+  td:nth-child(2) { white-space:nowrap; }
+  ul { margin:6pt 0 6pt 16pt; padding:0; }
+  li { margin-bottom:5pt; }
+  .bull li::marker { color:#1a7f37; }
+  .bear li::marker { color:#cf222e; }
+  .summary { background:#f6f8fa; border-left:4px solid #1f2328; padding:10pt 14pt; margin:6pt 0; font-size:10.5pt; }
+  .sources li { font-size:9.5pt; }
+  .sources a { color:#0969da; text-decoration:none; word-break:break-all; }
+  .disclaimer { margin-top:20pt; padding-top:8pt; border-top:1px solid #eaeef2; color:#666; font-size:9pt; }
+  .footer-id { color:#999; font-size:8.5pt; margin-top:4pt; }
+</style>
+</head>
+<body>
+  <h1>{{COMPANY_KR}} ({{TICKER}}) 주가 분석 리포트</h1>
+  <div class="meta">
+    <span>기준: <strong>{{REPORT_DATE}}</strong> (KST)</span>
+    <span>{{EXCHANGE}}: {{TICKER}}</span>
+    <span>시가총액: {{MARKET_CAP}}</span>
+  </div>
+
+  <h2>1. 가격 스냅샷</h2>
+  <table>
+    <thead><tr><th style="width:18%">구분</th><th style="width:22%">가격 / 변동률</th><th>비고</th></tr></thead>
+    <tbody>
+{{PERF_ROWS}}
+    </tbody>
+  </table>
+
+  <h2>2. 호재 (Bullish Catalysts)</h2>
+  <ul class="bull">
+{{CATALYSTS}}
+  </ul>
+
+  <h2>3. 악재 (Bearish Risks)</h2>
+  <ul class="bear">
+{{RISKS}}
+  </ul>
+
+  <h2>4. 종합 판단</h2>
+  <div class="summary">{{SUMMARY}}</div>
+
+  <h2>5. Sources</h2>
+  <ul class="sources">
+{{SOURCES}}
+  </ul>
+
+  <div class="disclaimer">{{DISCLAIMER}}</div>
+  <div class="footer-id">Generated: {{GENERATED_AT}}</div>
+</body>
+</html>
