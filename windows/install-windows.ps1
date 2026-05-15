@@ -12,7 +12,8 @@
 #   4. Git 설치 (변경 이력 추적/플러그인 다운로드용)
 #   5. Visual Studio Code 설치 (에디터)
 #   6. Claude Code 설치
-#   7. 설치 검증
+#   7. 탐색기 우클릭에 'PowerShell 여기서 열기' 메뉴 등록 (편의 기능)
+#   8. 설치 검증
 
 param(
     [switch]$Yes
@@ -86,7 +87,7 @@ Write-Ok "winget 사용 가능"
 Write-Host ""
 
 # Step 1: Node.js
-Write-Info "[1/5] Node.js"
+Write-Info "[1/6] Node.js"
 if (Has-Cmd "node") {
     $current = (& node --version) 2>$null
     Write-Info "이미 설치됨: Node.js $current"
@@ -107,7 +108,7 @@ if ($doInstall) {
 Write-Host ""
 
 # Step 2: Python
-Write-Info "[2/5] Python 3"
+Write-Info "[2/6] Python 3"
 $pythonCmd = $null
 foreach ($c in @("python","python3","py")) {
     if (Has-Cmd $c) { $pythonCmd = $c; break }
@@ -132,7 +133,7 @@ if ($doInstall) {
 Write-Host ""
 
 # Step 3: Git
-Write-Info "[3/5] Git"
+Write-Info "[3/6] Git"
 if (Has-Cmd "git") {
     $current = (& git --version) 2>$null
     Write-Info "이미 설치됨: $current"
@@ -153,7 +154,7 @@ if ($doInstall) {
 Write-Host ""
 
 # Step 4: Visual Studio Code
-Write-Info "[4/5] Visual Studio Code"
+Write-Info "[4/6] Visual Studio Code"
 if (Has-Cmd "code") {
     Write-Info "이미 설치됨: VS Code (code 명령어 감지)"
     $doInstall = Ask-Yes "재설치(업그레이드)할까요?" "n"
@@ -176,7 +177,7 @@ Write-Host ""
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
 # Step 5: Claude Code
-Write-Info "[5/5] Claude Code"
+Write-Info "[5/6] Claude Code"
 if (Has-Cmd "claude") {
     $current = (& claude --version) 2>$null
     if (-not $current) { $current = "version unknown" }
@@ -205,6 +206,45 @@ if ($doInstall) {
     }
 } else {
     Write-Info "Claude Code 단계 건너뜀"
+}
+Write-Host ""
+
+# Step 6: 탐색기 우클릭에 'PowerShell 여기서 열기' 메뉴 추가 (편의 기능)
+Write-Info "[6/6] 탐색기 우클릭 메뉴: 'PowerShell 여기서 열기' (편의 기능)"
+
+# HKCU(현재 사용자)에 등록 - 관리자 권한 불필요, 다른 사용자에는 영향 없음
+# - Directory\shell           : 폴더 아이콘을 우클릭했을 때
+# - Directory\Background\shell: 폴더를 열어둔 상태에서 빈 공간을 우클릭했을 때
+$menuKeyFolder = "HKCU:\Software\Classes\Directory\shell\PowerShellHere"
+$menuKeyBg     = "HKCU:\Software\Classes\Directory\Background\shell\PowerShellHere"
+$menuLabel     = "PowerShell 여기서 열기"
+# %V = 우클릭한 폴더 경로. LiteralPath로 넘겨 공백/한글 경로 안전 처리.
+$menuCommand   = 'powershell.exe -NoExit -Command "Set-Location -LiteralPath ''%V''"'
+
+if ((Test-Path $menuKeyFolder) -and (Test-Path $menuKeyBg)) {
+    Write-Info "이미 등록되어 있습니다."
+    $doRegister = Ask-Yes "덮어쓸까요?" "n"
+} else {
+    $doRegister = Ask-Yes "탐색기 우클릭에 'PowerShell 여기서 열기' 메뉴를 추가할까요?" "y"
+}
+
+if ($doRegister) {
+    try {
+        foreach ($key in @($menuKeyFolder, $menuKeyBg)) {
+            New-Item -Path $key -Force | Out-Null
+            Set-ItemProperty -Path $key -Name "(Default)" -Value $menuLabel
+            Set-ItemProperty -Path $key -Name "Icon" -Value "powershell.exe"
+            New-Item -Path "$key\command" -Force | Out-Null
+            Set-ItemProperty -Path "$key\command" -Name "(Default)" -Value $menuCommand
+        }
+        Write-Ok "탐색기 우클릭 메뉴 등록 완료"
+        Write-Info "Windows 11 사용자는 우클릭 → '추가 옵션 표시(Shift+F10)' 안에서 보입니다."
+        Write-Info "제거하려면: regedit 에서 위 두 키(PowerShellHere)를 삭제하세요."
+    } catch {
+        Write-Warn "메뉴 등록 중 오류: $_"
+    }
+} else {
+    Write-Info "탐색기 우클릭 메뉴 단계 건너뜀"
 }
 Write-Host ""
 
